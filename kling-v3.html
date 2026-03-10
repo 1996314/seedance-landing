@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kling 3.0 Motion Control - AI Video Generation Model | OpenArt</title>
+  <meta name="description" content="Create precise AI animations using Kling 3.0 Motion Control on OpenArt. Upload a reference video and apply exact motion to new characters or scenes. Free to try." />
+  <meta property="og:title" content="Kling 3.0 Motion Control - AI Video Generation Model | OpenArt" />
+  <meta property="og:description" content="Create precise AI animations using Kling 3.0 Motion Control on OpenArt. Upload a reference video and apply exact motion to new characters or scenes. Free to try." />
+  <meta property="og:image" content="" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Reset & Tokens ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #080808;
+      --bg2:       #0a0a0a;
+      --purple:    #0929f7;
+      --purple-l:  #9d5cf5;
+      --purple-ll: #c4b5fd;
+      --pink:      #0084ff;
+      --pink-l:    #60a5fa;
+      --grad:      linear-gradient(135deg, #0929f7 0%, #1a56ff 50%, #0084ff 100%);
+      --grad-text: linear-gradient(135deg, #a78bfa 0%, #0084ff 100%);
+      --border: rgba(255,255,255,0.08);
+      --border-p:  rgba(9,41,247,0.25);
+      --text:      #ffffff;
+      --muted:     rgba(255,255,255,0.55);
+      --dim:       rgba(255,255,255,0.3);
+      --card:      rgba(255,255,255,0.035);
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+    .g-text {
+      background: var(--grad-text);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(9,41,247,0.4); border-radius: 99px; }
+
+    /* ── Floating BG Icons ── */
+    #bg-layer {
+      position: fixed; inset: 0; z-index: 0;
+      pointer-events: none; overflow: hidden;
+    }
+    .fi {
+      position: absolute; opacity: 0.1; font-size: 1rem;
+      animation: fi-float linear infinite;
+      user-select: none;
+    }
+    @keyframes fi-float {
+      0%   { transform: translateY(0)    rotate(0deg);   opacity: 0.07; }
+      30%  {                                              opacity: 0.13; }
+      50%  { transform: translateY(-20px) rotate(10deg); opacity: 0.10; }
+      70%  {                                              opacity: 0.08; }
+      100% { transform: translateY(0)    rotate(0deg);   opacity: 0.07; }
+    }
+
+    /* ── Navbar ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+      height: 60px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 2.5rem;
+      background: rgba(8,8,15,0.8);
+      backdrop-filter: blur(18px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo {
+      font-size: 1.15rem; font-weight: 800; letter-spacing: -0.02em;
+      background: var(--grad);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .nav-center { display: flex; gap: 2rem; list-style: none; }
+    .nav-center a {
+      color: var(--muted); font-size: 0.875rem; font-weight: 500;
+      text-decoration: none; transition: color .2s;
+    }
+    .nav-center a:hover { color: var(--text); }
+    .nav-btn {
+      display: inline-flex; align-items: center; gap: .4rem;
+      background: var(--grad); color: #fff;
+      font-weight: 700; font-size: .85rem;
+      padding: .5rem 1.25rem; border-radius: 999px;
+      text-decoration: none; border: none; cursor: pointer;
+      transition: opacity .2s, transform .2s;
+      box-shadow: 0 4px 20px rgba(9,41,247,.4);
+    }
+    .nav-btn:hover { opacity: .88; transform: translateY(-1px); }
+
+    /* ── Section shared ── */
+    section { position: relative; z-index: 1; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 1.5rem; }
+    .sec-label {
+      display: inline-flex; align-items: center; gap: .5rem;
+      background: rgba(9,41,247,.12); border: 1px solid var(--border-p);
+      border-radius: 999px; padding: .3rem .9rem;
+      font-size: .72rem; font-weight: 700; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--purple-ll);
+      margin-bottom: 1rem;
+    }
+    .sec-title {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800; letter-spacing: -.03em;
+      line-height: 1.1; margin-bottom: .75rem;
+    }
+    .sec-sub {
+      font-size: 1.05rem; color: var(--muted);
+      max-width: 600px; line-height: 1.7;
+    }
+
+    /* ══════════════════════════════
+       HERO
+    ══════════════════════════════ */
+    #hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: flex-start;
+      padding: 90px 1.5rem 4rem;
+    }
+
+    /* Top text block */
+    .hero-top {
+      text-align: center;
+      margin-bottom: 3rem;
+      max-width: 800px;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: .5rem;
+      background: rgba(9,41,247,.15); border: 1px solid var(--border-p);
+      border-radius: 999px; padding: .35rem 1rem;
+      font-size: .8rem; font-weight: 600; color: var(--purple-ll);
+      letter-spacing: .04em; margin-bottom: 1.5rem;
+    }
+    .badge-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: #a78bfa;
+      animation: bdot 2s ease-in-out infinite;
+    }
+    @keyframes bdot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.7)} }
+
+    .hero-title {
+      font-size: clamp(2.6rem, 6.5vw, 5rem);
+      font-weight: 900; letter-spacing: -.04em;
+      line-height: 1.05; margin-bottom: 1.25rem;
+    }
+    .hero-sub {
+      font-size: clamp(.95rem, 1.8vw, 1.15rem);
+      color: var(--muted); line-height: 1.7;
+      margin-bottom: 2rem;
+    }
+    .hero-actions {
+      display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center;
+    }
+    .btn-hero {
+      display: inline-flex; align-items: center; gap: .45rem;
+      background: var(--grad); color: #fff;
+      font-weight: 700; font-size: 1rem;
+      padding: .9rem 2.2rem; border-radius: 999px;
+      text-decoration: none; border: none; cursor: pointer;
+      box-shadow: 0 6px 28px rgba(9,41,247,.45);
+      transition: all .25s; position: relative; overflow: hidden;
+    }
+    .btn-hero::after {
+      content:''; position:absolute; inset:0;
+      background: linear-gradient(135deg,rgba(255,255,255,.14),transparent);
+      opacity:0; transition:opacity .2s;
+    }
+    .btn-hero:hover { transform:translateY(-2px); box-shadow:0 10px 36px rgba(9,41,247,.55); }
+    .btn-hero:hover::after { opacity:1; }
+    .btn-ghost {
+      display: inline-flex; align-items: center; gap: .45rem;
+      background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12);
+      color: rgba(255,255,255,.8); font-weight: 600; font-size: 1rem;
+      padding: .9rem 2rem; border-radius: 999px;
+      text-decoration: none; cursor: pointer;
+      transition: all .25s;
+    }
+    .btn-ghost:hover { background:rgba(255,255,255,.1); transform:translateY(-2px); }
+
+    /* ── HERO TOOL CARD ── */
+    .hero-card-wrap {
+      width: 100%; max-width: 1060px;
+    }
+    .tool-card {
+      border-radius: 28px;
+      padding: 3px;
+      background: var(--grad);
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,.06),
+        0 30px 80px rgba(9,41,247,.3),
+        0 60px 120px rgba(0,132,255,.15);
+    }
+    .tool-card-inner {
+      background: linear-gradient(140deg,
+        rgba(10,6,30,.95) 0%,
+        rgba(20,8,40,.95) 50%,
+        rgba(30,10,28,.95) 100%);
+      border-radius: 26px;
+      overflow: hidden;
+    }
+    .card-topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid rgba(255,255,255,.06);
+      flex-wrap: wrap; gap: .75rem;
+    }
+    .topbar-left { display:flex; align-items:center; gap:1rem; }
+    .topbar-title { font-size:.95rem; font-weight:700; color:rgba(255,255,255,.9); }
+    .model-pill {
+      display:flex; align-items:center; gap:.5rem;
+      background:rgba(9,41,247,.18); border:1px solid rgba(9,41,247,.3);
+      border-radius:9px; padding:.3rem .75rem;
+    }
+    .model-pill-lbl { font-size:.62rem; font-weight:600; color:var(--purple-ll); text-transform:uppercase; letter-spacing:.07em; }
+    .model-pill-val { font-size:.82rem; font-weight:700; color:#fff; }
+    .model-pill-chev { font-size:.65rem; color:var(--muted); }
+
+    .topbar-countdown {
+      display:flex; align-items:center; gap:.3rem;
+      background:rgba(0,0,0,.3); border:1px solid rgba(9,41,247,.25);
+      border-radius:10px; padding:.4rem .85rem;
+    }
+    .tbc-label { font-size:.62rem; font-weight:700; color:var(--purple-ll); letter-spacing:.07em; text-transform:uppercase; margin-right:.2rem; }
+    .tbc-unit { display:flex; flex-direction:column; align-items:center; }
+    .tbc-num  { font-size:1.05rem; font-weight:900; font-variant-numeric:tabular-nums; background:var(--grad-text); -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text; min-width:1.6rem; text-align:center; }
+    .tbc-lbl  { font-size:.48rem; color:var(--dim); font-weight:600; letter-spacing:.04em; }
+    .tbc-sep  { font-size:.9rem; font-weight:700; color:rgba(167,139,250,.35); margin-bottom:.5rem; }
+
+    .card-body {
+      display: grid;
+      grid-template-columns: 420px 1fr;
+      gap: 0;
+    }
+    @media (max-width: 860px) {
+      .card-body { grid-template-columns: 1fr; }
+    }
+
+    /* ── Left control panel ── */
+    .ctrl-panel {
+      padding: 1.5rem;
+      border-right: 1px solid rgba(255,255,255,.06);
+    }
+    .tabs {
+      display:flex; background:rgba(0,0,0,.35); border-radius:11px;
+      padding:3px; gap:2px; margin-bottom:1.25rem;
+    }
+    .tab {
+      flex:1; padding:.42rem .6rem; border-radius:9px;
+      font-size:.75rem; font-weight:700; border:none; cursor:pointer;
+      transition:all .2s; color:rgba(255,255,255,.45); background:transparent;
+    }
+    .tab.active {
+      background:var(--grad); color:#fff;
+      box-shadow:0 2px 12px rgba(9,41,247,.35);
+    }
+    .tab:hover:not(.active) { color:rgba(255,255,255,.7); }
+
+    .upload-row { display:grid; grid-template-columns:1fr 1fr; gap:.75rem; margin-bottom:1rem; }
+    .upload-box {
+      border:1.5px dashed rgba(9,41,247,.4);
+      border-radius:12px; padding:1.1rem .5rem; text-align:center;
+      cursor:pointer; transition:all .2s;
+      background:rgba(9,41,247,.04);
+    }
+    .upload-box:hover { border-color:var(--purple-l); background:rgba(9,41,247,.09); }
+    .ub-icon { font-size:1.3rem; display:block; margin-bottom:.3rem; }
+    .ub-title { font-size:.7rem; font-weight:700; color:rgba(255,255,255,.7); }
+    .ub-sub   { font-size:.6rem; color:var(--dim); margin-top:.1rem; }
+
+    .toggle-row {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:.55rem 0; border-top:1px solid rgba(255,255,255,.06); border-bottom:1px solid rgba(255,255,255,.06);
+      margin-bottom:1rem;
+    }
+    .toggle-lbl { font-size:.75rem; font-weight:600; color:rgba(255,255,255,.65); }
+    .toggle { width:34px;height:18px; border-radius:999px; cursor:pointer; position:relative; transition:background .2s; }
+    .toggle.on  { background:var(--grad); }
+    .toggle.off { background:rgba(255,255,255,.15); }
+    .toggle::after {
+      content:''; position:absolute; width:12px;height:12px;
+      background:#fff; border-radius:50%; top:3px;
+      box-shadow:0 1px 4px rgba(0,0,0,.3);
+      transition:left .2s;
+    }
+    .toggle.on::after  { left:19px; }
+    .toggle.off::after { left:3px;  }
+
+    .fl {
+      font-size:.65rem; font-weight:700; color:rgba(255,255,255,.4);
+      text-transform:uppercase; letter-spacing:.07em; margin-bottom:.4rem;
+    }
+    .prompt-ta {
+      width:100%; background:rgba(0,0,0,.35);
+      border:1.5px solid rgba(255,255,255,.1);
+      border-radius:10px; padding:.65rem .8rem;
+      font-size:.8rem; color:rgba(255,255,255,.8);
+      resize:none; height:68px; font-family:inherit;
+      transition:border-color .2s; margin-bottom:.6rem;
+    }
+    .prompt-ta:focus { outline:none; border-color:rgba(9,41,247,.6); }
+    .prompt-ta::placeholder { color:rgba(255,255,255,.25); }
+    .prompt-btns { display:flex; gap:.5rem; margin-bottom:1rem; }
+    .pbtn {
+      display:flex; align-items:center; gap:.3rem;
+      background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1);
+      border-radius:7px; padding:.3rem .65rem;
+      font-size:.7rem; font-weight:600; color:rgba(255,255,255,.55);
+      cursor:pointer; transition:all .2s;
+    }
+    .pbtn:hover { background:rgba(9,41,247,.15); border-color:rgba(9,41,247,.35); color:var(--purple-ll); }
+
+    .ratio-chips { display:flex; gap:.4rem; flex-wrap:wrap; margin-bottom:1rem; }
+    .rc {
+      padding:.28rem .6rem; border-radius:7px;
+      font-size:.7rem; font-weight:700;
+      border:1.5px solid rgba(255,255,255,.1);
+      background:rgba(255,255,255,.04); color:rgba(255,255,255,.5);
+      cursor:pointer; transition:all .2s;
+    }
+    .rc.active {
+      background:var(--grad); border-color:transparent;
+      color:#fff; box-shadow:0 2px 10px rgba(9,41,247,.3);
+    }
+    .rc:hover:not(.active) { border-color:rgba(9,41,247,.4); color:var(--purple-ll); }
+
+    .sel-row { display:grid; grid-template-columns:1fr 1fr; gap:.75rem; margin-bottom:1rem; }
+    .fake-sel {
+      display:flex; align-items:center; justify-content:space-between;
+      background:rgba(0,0,0,.35); border:1.5px solid rgba(255,255,255,.1);
+      border-radius:9px; padding:.4rem .7rem;
+      font-size:.78rem; font-weight:700; color:rgba(255,255,255,.75);
+      cursor:pointer;
+    }
+    .fake-sel-chev { color:var(--muted); font-size:.65rem; }
+
+    .gen-sep { border-top:1px solid rgba(255,255,255,.06); padding-top:.9rem; }
+    .audio-row { display:flex;align-items:center;justify-content:space-between;margin-bottom:.8rem; }
+    .audio-lbl { font-size:.75rem;font-weight:600;color:rgba(255,255,255,.65);display:flex;align-items:center;gap:.35rem; }
+    .btn-gen {
+      width:100%; padding:.82rem;
+      background:var(--grad); border:none; border-radius:12px;
+      color:#fff; font-size:.92rem; font-weight:800;
+      cursor:pointer; transition:all .25s; font-family:inherit;
+      box-shadow:0 4px 20px rgba(9,41,247,.35);
+    }
+    .btn-gen:hover { transform:translateY(-1px); box-shadow:0 8px 28px rgba(9,41,247,.5); }
+    .credits-note { text-align:center;font-size:.67rem;color:rgba(255,255,255,.3);margin-top:.45rem; }
+    .credits-note strong { color:var(--purple-ll); }
+
+    /* ── Right video panel ── */
+    .video-panel {
+      padding: 1.5rem;
+      display: flex; flex-direction: column;
+    }
+    .vp-title {
+      font-size:.7rem; font-weight:700; color:rgba(255,255,255,.35);
+      text-transform:uppercase; letter-spacing:.09em; margin-bottom:1rem;
+    }
+    .video-preview {
+      flex:1; min-height:260px; border-radius:16px;
+      overflow:hidden; position:relative; cursor:pointer;
+      background:
+        radial-gradient(ellipse 70% 60% at 50% 95%, rgba(180,100,15,.8) 0%, transparent 65%),
+        radial-gradient(ellipse 100% 40% at 50% 100%, rgba(140,70,10,.9) 0%, transparent 55%),
+        linear-gradient(180deg,
+          #0d2a4a 0%,
+          #1a4a7a 18%,
+          #c8832a 42%,
+          #e09030 52%,
+          #b06820 65%,
+          #7a4010 80%,
+          #4a2508 100%);
+      transition:filter .2s;
+    }
+    .video-preview:hover { filter:brightness(1.05); }
+    .video-preview::before {
+      content:''; position:absolute;
+      bottom:0; left:0; right:0; height:38%;
+      background:
+        linear-gradient(180deg, transparent 0%, rgba(0,0,0,.25) 100%),
+        repeating-linear-gradient(90deg, transparent 0, transparent 48%, rgba(255,220,80,.15) 49%, rgba(255,220,80,.15) 51%, transparent 52%);
+    }
+    .video-preview::after {
+      content:''; position:absolute;
+      top:32%; left:50%; transform:translateX(-50%);
+      width:50px; height:50px; border-radius:50%;
+      background:rgba(255,230,100,.7);
+      box-shadow:0 0 30px 15px rgba(255,180,50,.35), 0 0 80px 40px rgba(255,140,30,.18);
+    }
+    .play-wrap {
+      position:absolute; inset:0;
+      display:flex; align-items:center; justify-content:center; z-index:2;
+    }
+    .play-btn {
+      width:56px; height:56px; border-radius:50%;
+      background:rgba(255,255,255,.15); border:2px solid rgba(255,255,255,.5);
+      display:flex; align-items:center; justify-content:center;
+      backdrop-filter:blur(6px); transition:all .2s;
+    }
+    .play-btn:hover { background:rgba(255,255,255,.25); transform:scale(1.1); }
+    .play-tri {
+      width:0;height:0; border-style:solid;
+      border-width:9px 0 9px 16px;
+      border-color:transparent transparent transparent rgba(255,255,255,.9);
+      margin-left:3px;
+    }
+    .vp-nav { display:flex; align-items:center; justify-content:space-between; margin-top:.85rem; }
+    .nav-arr {
+      width:32px;height:32px; border-radius:50%;
+      background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.1);
+      display:flex; align-items:center; justify-content:center;
+      font-size:.85rem; color:rgba(255,255,255,.5); cursor:pointer;
+      transition:all .2s;
+    }
+    .nav-arr:hover { background:rgba(9,41,247,.2); border-color:rgba(9,41,247,.4); color:var(--purple-ll); }
+    .vp-dots { display:flex; gap:.4rem; }
+    .vdot { width:7px;height:7px;border-radius:50%; background:rgba(255,255,255,.2); cursor:pointer; transition:all .2s; }
+    .vdot.active { width:20px;border-radius:4px; background:var(--grad); }
+    .vp-caption { font-size:.68rem; color:rgba(255,255,255,.3); text-align:center; margin-top:.55rem; }
+
+    /* ══════════════════════════════
+       WHAT IS section
+    ══════════════════════════════ */
+    #what {
+      padding: 6rem 1.5rem;
+      background: linear-gradient(180deg, transparent, rgba(9,41,247,.04) 50%, transparent);
+    }
+    .what-grid {
+      display:grid; grid-template-columns:1fr 1fr; gap:4rem; align-items:center;
+    }
+    @media(max-width:768px){ .what-grid{grid-template-columns:1fr;gap:2.5rem;} }
+    .what-tags { display:flex; flex-wrap:wrap; gap:.5rem; margin-top:1.5rem; }
+    .what-tag {
+      display:inline-flex; align-items:center; gap:.3rem;
+      background:rgba(9,41,247,.1); border:1px solid rgba(9,41,247,.2);
+      border-radius:7px; padding:.35rem .7rem;
+      font-size:.75rem; font-weight:600; color:var(--purple-ll);
+    }
+    .what-visual {
+      border-radius:20px; overflow:hidden; position:relative;
+      background:linear-gradient(135deg,rgba(9,41,247,.12),rgba(0,132,255,.08));
+      border:1px solid var(--border-p); padding:2rem;
+    }
+    .what-stat-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+    .what-stat {
+      background:rgba(0,0,0,.3); border:1px solid rgba(255,255,255,.07);
+      border-radius:14px; padding:1.25rem 1rem; text-align:center;
+    }
+    .ws-num { font-size:1.9rem; font-weight:900; letter-spacing:-.03em; background:var(--grad-text);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text; }
+    .ws-lbl { font-size:.73rem; color:var(--muted); margin-top:.2rem; }
+
+    /* ══════════════════════════════
+       FEATURES
+    ══════════════════════════════ */
+    #features { padding:6rem 1.5rem; }
+    .features-header { text-align:center; margin-bottom:3rem; }
+    .features-header .sec-sub { margin:0 auto; }
+    .feat-grid {
+      display:grid; grid-template-columns:repeat(3,1fr); gap:1.25rem;
+    }
+    @media(max-width:900px){ .feat-grid{grid-template-columns:1fr 1fr;} }
+    @media(max-width:560px){ .feat-grid{grid-template-columns:1fr;} }
+    .feat-card {
+      background:var(--card); border:1px solid var(--border);
+      border-radius:20px; padding:1.75rem 1.5rem;
+      transition:all .3s; position:relative; overflow:hidden;
+    }
+    .feat-card::after {
+      content:''; position:absolute; top:0;left:0;right:0; height:2px;
+      background:var(--grad); opacity:0; transition:opacity .3s;
+    }
+    .feat-card:hover { border-color:rgba(9,41,247,.25); background:rgba(9,41,247,.06); transform:translateY(-5px); }
+    .feat-card:hover::after { opacity:1; }
+    .feat-icon { font-size:2rem; margin-bottom:1rem; display:block; }
+    .feat-title { font-size:1rem; font-weight:700; margin-bottom:.5rem; }
+    .feat-desc { font-size:.85rem; color:var(--muted); line-height:1.65; }
+
+    /* ══════════════════════════════
+       HOW TO USE
+    ══════════════════════════════ */
+    #how { padding:6rem 1.5rem; background:linear-gradient(180deg,transparent,rgba(0,132,255,.03) 50%,transparent); }
+    .how-header { text-align:center; margin-bottom:3rem; }
+    .how-header .sec-sub { margin:0 auto; }
+    .steps { display:grid; grid-template-columns:repeat(4,1fr); gap:1.25rem; }
+    @media(max-width:900px){ .steps{grid-template-columns:1fr 1fr;} }
+    @media(max-width:480px){ .steps{grid-template-columns:1fr;} }
+    .step-card {
+      background:var(--card); border:1px solid var(--border);
+      border-radius:18px; padding:1.5rem 1.25rem;
+      position:relative; transition:all .3s;
+    }
+    .step-card:hover { border-color:var(--border-p); transform:translateY(-3px); }
+    .step-num {
+      width:36px;height:36px; border-radius:50%;
+      background:var(--grad); display:flex;align-items:center;justify-content:center;
+      font-size:.85rem; font-weight:900; margin-bottom:1rem;
+      box-shadow:0 4px 14px rgba(9,41,247,.35);
+    }
+    .step-title { font-size:.95rem; font-weight:700; margin-bottom:.4rem; }
+    .step-desc { font-size:.82rem; color:var(--muted); line-height:1.6; }
+    .step-card:not(:last-child)::after {
+      content:'→';
+      position:absolute; right:-20px; top:30px;
+      font-size:1rem; color:rgba(9,41,247,.35);
+    }
+    @media(max-width:900px){ .step-card::after{display:none;} }
+
+    /* ══════════════════════════════
+       FAQ
+    ══════════════════════════════ */
+    #faq { padding:6rem 1.5rem; }
+    .faq-inner { max-width:720px; margin:0 auto; }
+    .faq-header { text-align:center; margin-bottom:3rem; }
+    .faq-list { display:flex; flex-direction:column; gap:.75rem; }
+    .faq-item {
+      background:var(--card); border:1px solid var(--border);
+      border-radius:14px; overflow:hidden; transition:border-color .2s;
+    }
+    .faq-item.open { border-color:rgba(9,41,247,.3); }
+    .faq-q {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:1.1rem 1.25rem; cursor:pointer; gap:1rem;
+      user-select:none;
+    }
+    .faq-q-txt { font-size:.92rem; font-weight:600; color:rgba(255,255,255,.85); }
+    .faq-icon {
+      width:22px;height:22px; border-radius:50%; flex-shrink:0;
+      background:rgba(9,41,247,.15); border:1px solid rgba(9,41,247,.25);
+      display:flex;align-items:center;justify-content:center;
+      font-size:.7rem; color:var(--purple-ll);
+      transition:transform .3s, background .2s;
+    }
+    .faq-item.open .faq-icon { transform:rotate(45deg); background:rgba(9,41,247,.3); }
+    .faq-a {
+      max-height:0; overflow:hidden;
+      transition:max-height .4s cubic-bezier(.4,0,.2,1), padding .3s;
+      font-size:.87rem; color:var(--muted); line-height:1.7;
+    }
+    .faq-item.open .faq-a { max-height:300px; padding:0 1.25rem 1.25rem; }
+
+    /* ══════════════════════════════
+       FINAL CTA
+    ══════════════════════════════ */
+    #cta-final { padding:5rem 1.5rem; text-align:center; }
+    .cta-box {
+      max-width:680px; margin:0 auto;
+      background:linear-gradient(135deg,rgba(9,41,247,.12),rgba(0,132,255,.1));
+      border:1px solid rgba(9,41,247,.25); border-radius:28px;
+      padding:3.5rem 2rem;
+    }
+    .cta-title { font-size:clamp(1.7rem,3.5vw,2.5rem); font-weight:800; letter-spacing:-.025em; margin-bottom:.75rem; }
+    .cta-sub { color:var(--muted); margin-bottom:2rem; font-size:1rem; line-height:1.6; }
+
+    /* ══════════════════════════════
+       FOOTER
+    ══════════════════════════════ */
+    footer {
+      position:relative; z-index:1;
+      border-top:1px solid var(--border);
+      padding:2.5rem 1.5rem 2rem;
+    }
+    .footer-inner {
+      max-width:1100px; margin:0 auto;
+      display:flex; align-items:center; justify-content:space-between;
+      flex-wrap:wrap; gap:1.5rem;
+    }
+    .footer-logo { font-size:1rem;font-weight:800; background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text; }
+    .footer-links { display:flex; gap:1.5rem; list-style:none; flex-wrap:wrap; }
+    .footer-links a { color:var(--dim); font-size:.82rem; text-decoration:none; transition:color .2s; }
+    .footer-links a:hover { color:var(--muted); }
+    .footer-copy { font-size:.78rem; color:var(--dim); }
+
+    @media(max-width:768px){
+      nav { padding:0 1rem; }
+      .nav-center { display:none; }
+    }
+  </style>
+<link href="https://cdn.prod.website-files.com/6600e1eab90de089c2d9c972/css/openart-blog-posts.shared.d47444ca8.min.css" rel="stylesheet">
+</head>
+<body>
+
+<!-- ─ Floating BG Icons ─ -->
+<div id="bg-layer"></div>
+
+<!-- ─ Navbar ─ -->
+<div class="fixed-navbar"><div data-collapse="medium" data-animation="default" data-duration="400" fs-scrolldisable-element="smart-nav" data-easing="ease" data-easing2="ease" role="banner" class="navbar-1-component w-nav"><div class="navbar1-container"><a href="https://openart.ai/" target="_blank" id="w-node-_4af31c78-40e8-1bef-cb76-1d52140aa613-140aa610" class="navbar-1-logo-link w-nav-brand"><img width="175" loading="lazy" alt="" src="https://cdn.prod.website-files.com/6600e1eab90de089c2d9c972/6600e2a8daeca4ae756289cb_Logo.avif"></a><nav role="navigation" id="w-node-_4af31c78-40e8-1bef-cb76-1d52140aa615-140aa610" class="navbar-1-menu is-page-height-tablet w-nav-menu"><a href="#" class="button-2 is-navbar2-button hide-desktop w-button">Sign Up</a></nav><div id="w-node-_4af31c78-40e8-1bef-cb76-1d52140aa618-140aa610" class="navbar-1-button-wrapper"><div data-delay="0" data-hover="true" class="language-dropdown w-dropdown"><div class="language-toggle w-dropdown-toggle" id="w-dropdown-toggle-0" aria-controls="w-dropdown-list-0" aria-haspopup="menu" aria-expanded="false" role="button" tabindex="0"><img src="https://cdn.prod.website-files.com/6600e1eab90de089c2d9c972/67227f83820d95dc964a984b_language-svgrepo-com%20(1).svg" loading="lazy" width="20" alt=""><div class="icon-3 is-lang w-icon-dropdown-toggle" aria-hidden="true"></div></div><nav class="language-list w-dropdown-list" id="w-dropdown-list-0" aria-labelledby="w-dropdown-toggle-0"><div class="w-locales-list"><div role="list" class="locales-list w-locales-items"><div role="listitem" class="language-link w-locales-item"><a hreflang="en" href="/m/vellum-ai-skin-enhancer" aria-current="page" class="language-link w-inline-block w--current" tabindex="0"><img src="https://cdn.prod.website-files.com/6600e1eab90de089c2d9c972/67227aee664e79bf95dbb617_united-kingdom.svg" loading="lazy" alt="" class="flag-1"><div class="language-link-text">English</div></a></div><div role="listitem" class="language-link w-locales-item"><a hreflang="pt" href="/pt/m/vellum-ai-skin-enhancer" class="language-link w-inline-block" tabindex="0"><img src="https://cdn.prod.website-files.com/6600e1eab90de089c2d9c972/67227db88ead221fcc2e350a_67227a1cb3d2e5c7742b2ac0_portugal.svg" loading="lazy" alt="" class="flag-1"><div class="language-link-text">Portuguese</div></a></div><div role="listitem" class="language-link w-locales-item"><a hreflang="es" href="/es/m/vellum-ai-skin-enhancer" class="language-link w-inline-block" tabindex="0"><img src="https://cdn.prod.website-files.com/6600e1eab90de089c2d9c972/672a6af9a7c8c37fe88ce6e2_67227a1cb3d2e5c7742b2a76_spain.svg" loading="lazy" alt="" class="flag-1"><div class="language-link-text">Spanish</div></a></div><div role="listitem" class="language-link w-locales-item"><a hreflang="de" href="/de/m/vellum-ai-skin-enhancer" class="language-link w-inline-block" tabindex="0"><img src="https://cdn.prod.website-files.com/6600e1eab90de089c2d9c972/672a7209bc16cce6f26aa9dd_67227a1cb3d2e5c7742b2a5e_germany.svg" loading="lazy" alt="" class="flag-1"><div class="language-link-text">German</div></a></div><div role="listitem" class="language-link w-locales-item"><a hreflang="fr" href="/fr/m/vellum-ai-skin-enhancer" class="language-link w-inline-block" tabindex="0"><img src="https://cdn.prod.website-files.com/6600e1eab90de089c2d9c972/67885cd0d4a048f2df9d1c19_french%20flag.avif" loading="lazy" alt="" class="flag-1"><div class="language-link-text">French</div></a></div><div role="listitem" class="language-link w-locales-item"><a hreflang="it" href="/it/m/vellum-ai-skin-enhancer" class="language-link w-inline-block" tabindex="0"><img src="https://cdn.prod.website-files.com/6600e1eab90de089c2d9c972/678ed9bc94cd537c70f00978_f854b16987f1fbe5a88bd75e21f12271.avif" loading="lazy" alt="" class="flag-1"><div class="language-link-text">Italian</div></a></div><div role="listitem" class="language-link w-locales-item"><a hreflang="ko" href="/ko/m/vellum-ai-skin-enhancer" class="language-link w-inline-block" tabindex="0"><img src="https://cdn.prod.website-files.com/6600e1eab90de089c2d9c972/672a724ed86c6c46cbce9463_67227a1cb3d2e5c7742b2a43_south-korea.svg" loading="lazy" alt="" class="flag-1"><div class="language-link-text">Korean</div></a></div><div role="listitem" class="language-link w-locales-item"><a hreflang="ja" href="/ja/m/vellum-ai-skin-enhancer" class="language-link w-inline-block" tabindex="0"><img src="https://cdn.prod.website-files.com/6600e1eab90de089c2d9c972/67a52e0beb018d0e04cc9db5_images%20(1).avif" loading="lazy" alt="" class="flag-1"><div class="language-link-text">Japanese</div></a></div><div role="listitem" class="language-link w-locales-item"><a hreflang="pl" href="/pl/m/vellum-ai-skin-enhancer" class="language-link w-inline-block" tabindex="0"><img src="https://cdn.prod.website-files.com/6600e1eab90de089c2d9c972/67ae42caf3f0f13662a6275a_polish.avif" loading="lazy" alt="" class="flag-1"><div class="language-link-text">Polish</div></a></div><div role="listitem" class="language-link w-locales-item"><a hreflang="nl" href="/nl/m/vellum-ai-skin-enhancer" class="language-link w-inline-block" tabindex="0"><img src="https://cdn.prod.website-files.com/6600e1eab90de089c2d9c972/67b64ac0e6985ca8a69d80b1_323275.avif" loading="lazy" alt="" class="flag-1"><div class="language-link-text">Dutch</div></a></div><div role="listitem" class="language-link w-locales-item"><a hreflang="sv" href="/sv/m/vellum-ai-skin-enhancer" class="language-link w-inline-block" tabindex="0"><img src="https://cdn.prod.website-files.com/6600e1eab90de089c2d9c972/67b64e72f1da4abcf1b0ae75_istockphoto-692201408-612x612.avif" loading="lazy" alt="" class="flag-1"><div class="language-link-text">Swedish</div></a></div><div role="listitem" class="language-link w-locales-item"><a hreflang="hi" href="/hi/m/vellum-ai-skin-enhancer" class="language-link w-inline-block" tabindex="0"><img src="https://cdn.prod.website-files.com/6600e1eab90de089c2d9c972/67e5ab6995c2c6d0cd054bd0_67227a1cb3d2e5c7742b29f3_india.svg" loading="lazy" alt="" class="flag-1"><div class="language-link-text">Hindi</div></a></div></div></div></nav></div><a href="https://discord.gg/openart-ai-1009536403555750018" target="_blank" class="menu-bar-link-block desktop w-inline-block"><img width="20" loading="lazy" alt="" src="https://cdn.prod.website-files.com/6600e1eab90de089c2d9c972/6600e2a8daeca4ae756289ce_discord-icon-svgrepo-com.svg"><div id="w-node-_4af31c78-40e8-1bef-cb76-1d52140aa61b-140aa610" class="button-text">Join Discord</div></a><a href="https://discord.gg/ysmMzCjQ" target="_blank" class="menu-bar-link-block mobile w-inline-block"><img width="20" loading="lazy" alt="" src="https://cdn.prod.website-files.com/6600e1eab90de089c2d9c972/6600e2a8daeca4ae756289ce_discord-icon-svgrepo-com.svg"><div id="w-node-_4af31c78-40e8-1bef-cb76-1d52140aa61f-140aa610" class="button-text">Discord </div></a><div class="navbar-1-menu-button w-nav-button" style="-webkit-user-select: text;" aria-label="menu" role="button" tabindex="0" aria-controls="w-nav-overlay-0" aria-haspopup="menu" aria-expanded="false"><div class="menu-icon-1"><div class="menu-icon-1-line-top"></div>
+
+
+<!-- ════════════════════════════════
+     HERO
+════════════════════════════════ -->
+<section id="hero">
+  <div class="hero-top">
+    <div class="hero-badge">
+      <span class="badge-dot"></span>
+      NEW · Kuaishou AI
+    </div>
+
+    <h1 class="hero-title">Kling 3.0 Motion Control</h1>
+    <p class="hero-sub">Create precise AI animations using Kling 3.0 Motion Control video model on OpenArt. Upload a reference video and apply the exact movement to a new character or scene.</p>
+    <div class="hero-actions">
+      <a href="https://openart.ai/" class="btn-hero">🎬 Generate Now</a>
+      <a href="#what" class="btn-ghost">Learn More →</a>
+    </div>
+  </div>
+
+  <!-- Tool Card -->
+  <div class="hero-card-wrap">
+    <div class="tool-card">
+      <div class="tool-card-inner">
+
+        <!-- Top bar -->
+        <div class="card-topbar">
+          <div class="topbar-left">
+            <div class="topbar-title">✦ Kling Motion Studio</div>
+            <div class="model-pill">
+              <span class="model-pill-lbl">Model</span>
+              <span class="model-pill-val">Kling 3.0</span>
+              <span class="model-pill-chev">▾</span>
+            </div>
+          </div>
+          <div class="topbar-countdown">
+            <span class="tbc-label">🚀 Launching in</span>
+            <div class="tbc-unit"><span class="tbc-num" id="td">00</span><span class="tbc-lbl">days</span></div>
+            <div class="tbc-sep">:</div>
+            <div class="tbc-unit"><span class="tbc-num" id="th">00</span><span class="tbc-lbl">hrs</span></div>
+            <div class="tbc-sep">:</div>
+            <div class="tbc-unit"><span class="tbc-num" id="tm">00</span><span class="tbc-lbl">min</span></div>
+            <div class="tbc-sep">:</div>
+            <div class="tbc-unit"><span class="tbc-num" id="ts">00</span><span class="tbc-lbl">sec</span></div>
+          </div>
+        </div>
+
+        <!-- Two-column body -->
+        <div class="card-body">
+
+          <!-- LEFT: Controls -->
+          <div class="ctrl-panel">
+            <div class="tabs">
+              <button class="tab active" onclick="switchTab(this, 'img')">🖼 Image to Video</button>
+              <button class="tab" onclick="switchTab(this, 'txt')">✍️ Text to Video</button>
+            </div>
+
+            <div class="upload-row" id="upload-row">
+              <div class="upload-box">
+                <span class="ub-icon">⬆️</span>
+                <div class="ub-title">Start Frame</div>
+                <div class="ub-sub">Click or drag file</div>
+              </div>
+              <div class="upload-box">
+                <span class="ub-icon">⬆️</span>
+                <div class="ub-title">End Frame</div>
+                <div class="ub-sub">Click or drag file</div>
+              </div>
+            </div>
+
+            <div class="toggle-row">
+              <span class="toggle-lbl">Start-end Frame Mode</span>
+              <div class="toggle on" onclick="this.classList.toggle('on');this.classList.toggle('off');"></div>
+            </div>
+
+            <div style="margin-bottom:.75rem">
+              <div class="fl">Prompt</div>
+              <textarea class="prompt-ta" placeholder="Please describe the video content…"></textarea>
+              <div class="prompt-btns">
+                <button class="pbtn">🎨 Preset</button>
+                <button class="pbtn">✨ Prompt Enhance</button>
+              </div>
+            </div>
+
+            <div style="margin-bottom:.9rem">
+              <div class="fl">Output Aspect Ratio</div>
+              <div class="ratio-chips">
+                <div class="rc active" onclick="pickRatio(this)">16:9</div>
+                <div class="rc" onclick="pickRatio(this)">9:16</div>
+                <div class="rc" onclick="pickRatio(this)">1:1</div>
+                <div class="rc" onclick="pickRatio(this)">4:3</div>
+                <div class="rc" onclick="pickRatio(this)">3:4</div>
+              </div>
+            </div>
+
+            <div class="sel-row">
+              <div>
+                <div class="fl">Quality</div>
+                <div class="fake-sel">1080p <span class="fake-sel-chev">▾</span></div>
+              </div>
+              <div>
+                <div class="fl">Duration</div>
+                <div class="fake-sel">5s <span class="fake-sel-chev">▾</span></div>
+              </div>
+            </div>
+
+            <div class="gen-sep">
+              <div class="audio-row">
+                <span class="audio-lbl">🎵 Generate Audio</span>
+                <div class="toggle off" onclick="this.classList.toggle('on');this.classList.toggle('off');"></div>
+              </div>
+              <button class="btn-gen">⚡ Generate</button>
+              <div class="credits-note">Credits required: <strong>30</strong> · Free after sign-in ✓</div>
+            </div>
+          </div><!-- /ctrl-panel -->
+
+          <!-- RIGHT: Video Preview -->
+          <div class="video-panel">
+            <div class="vp-title">🎬 Sample Output</div>
+
+            <div class="video-preview">
+              <div class="play-wrap">
+                <div class="play-btn">
+                  <div class="play-tri"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="vp-nav">
+              <div class="nav-arr" onclick="rotDot(-1)">‹</div>
+              <div class="vp-dots" id="vp-dots">
+                <div class="vdot active"></div>
+                <div class="vdot"></div>
+                <div class="vdot"></div>
+                <div class="vdot"></div>
+              </div>
+              <div class="nav-arr" onclick="rotDot(1)">›</div>
+            </div>
+            <div class="vp-caption">🎭 Motion Transfer · Generated by Kling 3.0</div>
+          </div><!-- /video-panel -->
+
+        </div><!-- /card-body -->
+      </div><!-- /tool-card-inner -->
+    </div><!-- /tool-card -->
+  </div><!-- /hero-card-wrap -->
+</section>
+
+
+<!-- ════════════════════════════════
+     WHAT IS
+════════════════════════════════ -->
+<section id="what">
+  <div class="container">
+    <div class="what-grid">
+      <div>
+        <div class="sec-label">✦ About</div>
+        <h2 class="sec-title">Key Features of Kling 3.0 Motion Control</h2>
+        <p class="sec-sub">Kling 3.0 Motion Control on OpenArt lets you transfer motion from a reference video onto a new character or image. It analyzes body movement, gestures, and timing from the source clip and recreates the same motion while preserving the appearance of your character. This allows you to animate characters, avatars, or mascots with realistic movement while controlling the scene and camera through prompts.</p>
+        <div class="what-tags">
+          <span class="what-tag">🎥 Motion Transfer</span><span class="what-tag">👤 Identity Preservation</span><span class="what-tag">🎬 Cinematic Control</span><span class="what-tag">🆓 Free to Try</span>
+        </div>
+      </div>
+
+      <div class="what-visual">
+        <div class="what-stat-grid">
+          
+        <div class="what-stat">
+          <div class="ws-num">3.0</div>
+          <div class="ws-lbl">Latest Version</div>
+        </div>
+        <div class="what-stat">
+          <div class="ws-num">4K</div>
+          <div class="ws-lbl">Output Quality</div>
+        </div>
+        <div class="what-stat">
+          <div class="ws-num">100%</div>
+          <div class="ws-lbl">Motion Accuracy</div>
+        </div>
+        <div class="what-stat">
+          <div class="ws-num">Free</div>
+          <div class="ws-lbl">To Get Started</div>
+        </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════
+     KEY FEATURES
+════════════════════════════════ -->
+<section id="features">
+  <div class="container">
+    <div class="features-header">
+      <div class="sec-label">✦ Capabilities</div>
+      <h2 class="sec-title">Key <span class="g-text">Features</span></h2>
+      <p class="sec-sub">Full control over motion, character, and camera in one model.</p>
+    </div>
+
+    <div class="feat-grid">
+      
+      <div class="feat-card">
+        <span class="feat-icon">🔄</span>
+        <div class="feat-title">Reference Motion Transfer</div>
+        <div class="feat-desc">Upload a video and replicate its body movement, gestures, and timing on a different character or scene.</div>
+      </div>
+      <div class="feat-card">
+        <span class="feat-icon">👤</span>
+        <div class="feat-title">Character Identity Preservation</div>
+        <div class="feat-desc">Maintain consistent faces, clothing, and appearance while applying new motion to your character.</div>
+      </div>
+      <div class="feat-card">
+        <span class="feat-icon">🎬</span>
+        <div class="feat-title">Cinematic Camera Direction</div>
+        <div class="feat-desc">Combine motion transfer with camera instructions like tracking shots, pans, and zooms for full cinematic control.</div>
+      </div>
+      <div class="feat-card">
+        <span class="feat-icon">👁️</span>
+        <div class="feat-title">Face Occlusion Restoration</div>
+        <div class="feat-desc">Preserve character identity even when the face becomes partially hidden during movement using Element Binding.</div>
+      </div>
+      <div class="feat-card">
+        <span class="feat-icon">🌆</span>
+        <div class="feat-title">Scene & Environment Control</div>
+        <div class="feat-desc">Separate character motion from the scene — place any motion into a completely different environment or lighting setup.</div>
+      </div>
+      <div class="feat-card">
+        <span class="feat-icon">⚡</span>
+        <div class="feat-title">Fast Generation</div>
+        <div class="feat-desc">Generate high-quality motion videos quickly without compromising on accuracy or visual consistency.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════
+     HOW TO USE
+════════════════════════════════ -->
+<section id="how">
+  <div class="container">
+    <div class="how-header">
+      <div class="sec-label">✦ Get Started</div>
+      <h2 class="sec-title">How to <span class="g-text">Use It</span></h2>
+      <p class="sec-sub">Turn a real motion clip into a new AI video in five simple steps.</p>
+    </div>
+
+    <div class="steps">
+      
+      <div class="step-card">
+        <div class="step-num">01</div>
+        <div class="step-title">Pick the Model</div>
+        <div class="step-desc">To get started, select the Kling 3.0 Motion Control AI video model on OpenArt.</div>
+      </div>
+      <div class="step-card">
+        <div class="step-num">02</div>
+        <div class="step-title">Upload Motion Reference</div>
+        <div class="step-desc">Upload a reference video that contains the movement you want to reproduce. This clip defines how the character moves.</div>
+      </div>
+      <div class="step-card">
+        <div class="step-num">03</div>
+        <div class="step-title">Add Character Image & Prompt</div>
+        <div class="step-desc">Upload an image that defines the character and write a prompt describing the environment, lighting, or camera setup.</div>
+      </div>
+      <div class="step-card">
+        <div class="step-num">04</div>
+        <div class="step-title">Generate & Review</div>
+        <div class="step-desc">Generate the video and review how the motion has been applied. Adjust the prompt or reference clip to refine results.</div>
+      </div>
+      <div class="step-card">
+        <div class="step-num">05</div>
+        <div class="step-title">Save & Share</div>
+        <div class="step-desc">Once the animation matches your vision, save the video or share it directly from OpenArt.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════
+     FAQ
+════════════════════════════════ -->
+<section id="faq">
+  <div class="faq-inner">
+    <div class="faq-header">
+      <div class="sec-label" style="display:inline-flex">✦ FAQ</div>
+      <h2 class="sec-title" style="margin-top:.5rem">Frequently Asked <span class="g-text">Questions</span></h2>
+    </div>
+
+    <div class="faq-list">
+      
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          <span class="faq-q-txt">How do I get started with Kling 3.0 Motion Control?</span>
+          <span class="faq-icon">+</span>
+        </div>
+        <div class="faq-a">To start using Kling 3.0 Motion Control on OpenArt, select the model and upload a reference video that contains the motion you want to replicate. Then upload a character image and add a prompt describing the scene or camera setup.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          <span class="faq-q-txt">What is Kling 3.0 Motion Control?</span>
+          <span class="faq-icon">+</span>
+        </div>
+        <div class="faq-a">Kling 3.0 Motion Control is an AI video generation system that transfers movement from a reference video to a new character or scene. Instead of generating motion entirely from text prompts, the model analyzes the motion in a source clip and recreates it with a different subject.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          <span class="faq-q-txt">What inputs does Kling 3.0 Motion Control support?</span>
+          <span class="faq-icon">+</span>
+        </div>
+        <div class="faq-a">The model typically uses a reference video to guide motion, a character image to define appearance, and a text prompt to control the environment and camera direction.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          <span class="faq-q-txt">What type of reference videos work best?</span>
+          <span class="faq-icon">+</span>
+        </div>
+        <div class="faq-a">Reference clips that clearly show the subject's body movement usually produce the best results. Videos with smooth motion, minimal blur, and a visible subject help the system extract movement more accurately.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          <span class="faq-q-txt">Can I control the camera in Kling 3.0 Motion Control?</span>
+          <span class="faq-icon">+</span>
+        </div>
+        <div class="faq-a">Yes. The reference video controls the character's movement, while the prompt can describe the camera direction, scene composition, and lighting. This allows the same motion to be placed into different cinematic settings.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          <span class="faq-q-txt">Can Kling 3.0 animate characters from images?</span>
+          <span class="faq-icon">+</span>
+        </div>
+        <div class="faq-a">Yes. You can upload an image of a character and apply motion from a real video. The model recreates the motion while preserving the character's visual appearance.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          <span class="faq-q-txt">Is Kling 3.0 better than Seedance 2.0?</span>
+          <span class="faq-icon">+</span>
+        </div>
+        <div class="faq-a">Kling 3.0 is particularly strong at motion transfer and choreography replication when you want to reproduce movement from a real video. Seedance 2.0 provides broader multi-modal control and integrated audio generation, which can be useful for longer or more complex video projects.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════
+     FINAL CTA
+════════════════════════════════ -->
+<section id="cta-final">
+  <div class="cta-box">
+    <h2 class="cta-title">Ready to Bring Your Characters to Life?</h2>
+    <p class="cta-sub">Upload a motion reference and generate your first AI animation.<br />No technical skills required.</p>
+    <a href="https://openart.ai/" class="btn-hero" style="font-size:1.05rem;padding:1rem 2.5rem;">🎬 Generate Now</a>
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════
+     FOOTER
+════════════════════════════════ -->
+<div class="footer blog-footer"><div class="container is-foote"><div class="footer-content"><div class="button is-link is-icon footer-grid-content"><a href="/?r=0" class="footer_logo w-inline-block"><img src="https://cdn.prod.website-files.com/6600e1eab90de089c2d9c972/683dd478931bc960080c8d2c_Logo.avif" loading="lazy" alt=""></a></div><div class="footer-grid-content"><div class="footer-heading">Product</div><div class="fade-in-move-on-scroll"><a href="https://openart.ai/home" class="footer-link w-inline-block"><div>Home</div><div class="link-block-underline"></div></a></div><div class="fade-in-move-on-scroll"><a href="https://openart.ai/create" class="footer-link w-inline-block"><div>Create</div><div class="link-block-underline"></div></a></div><div class="fade-in-move-on-scroll"><a href="https://openart.ai/create?mode=edit" class="footer-link w-inline-block"><div>Edit</div><div class="link-block-underline"></div></a></div><div class="fade-in-move-on-scroll"><a href="https://openart.ai/discovery" class="footer-link w-inline-block"><div>Discover</div><div class="link-block-underline"></div></a></div><div class="fade-in-move-on-scroll"><a href="https://openart.ai/models" class="footer-link w-inline-block"><div>Train model</div><div class="link-block-underline"></div></a></div></div><div class="footer-grid-content"><div class="footer-heading">AI tools</div><div class="fade-in-move-on-scroll"><a href="https://openart.ai/ai-image-generator" class="footer-link w-inline-block"><div class="text-block-7">AI&nbsp;Image Generator</div><div class="link-block-underline"></div></a></div><div class="fade-in-move-on-scroll"><a href="https://openart.ai/apps/image-to-video" class="footer-link w-inline-block"><div class="text-block-7">Image to video</div><div class="link-block-underline"></div></a></div><div class="fade-in-move-on-scroll"><a href="https://openart.ai/characters" class="footer-link w-inline-block"><div class="text-block-7">Consistent character</div><div class="link-block-underline"></div></a></div><div class="fade-in-move-on-scroll"><a href="https://openart.ai/apps/sketch-to-image" class="footer-link w-inline-block"><div class="text-block-7">Sketch to image</div><div class="link-block-underline"></div></a></div><div class="fade-in-move-on-scroll"><a href="https://openart.ai/apps/creative-upscale" class="footer-link w-inline-block"><div class="text-block-7">Creative Upscale</div><div class="link-block-underline"></div></a></div><div class="fade-in-move-on-scroll"><a href="https://openart.ai/apps/creative-variations" class="footer-link w-inline-block"><div>Creative variations</div><div class="link-block-underline"></div></a></div><div class="fade-in-move-on-scroll"><a href="https://openart.ai/apps/ai_qrcode" class="footer-link w-inline-block"><div>AI QR&nbsp;code</div><div class="link-block-underline"></div></a></div></div><div class="footer-grid-content"><div class="footer-heading">Resources</div><div class="fade-in-move-on-scroll"><a href="https://openart.ai/terms" target="_blank" class="footer-link w-inline-block"><div>Terms of Service</div><div class="link-block-underline"></div></a></div><div class="fade-in-move-on-scroll"><a href="https://openart.notion.site/OpenArt-Job-Openings-2eb269c1f58580c082c8f6ee9934c1c4?pvs=143" target="_blank" class="footer-link w-inline-block"><div>Career</div><div class="link-block-underline"></div></a></div><div class="fade-in-move-on-scroll"><a href="https://openart.ai/blog" class="footer-link w-inline-block"><div>Blog</div><div class="link-block-underline"></div></a></div><div class="fade-in-move-on-scroll"><a href="https://openart.ai/promptbook" class="footer-link w-inline-block"><div>Prompt book</div><div class="link-block-underline"></div></a></div><div class="fade-in-move-on-scroll"><a href="https://openart.ai/style-palettes" class="footer-link w-inline-block"><div>Style palette</div><div class="link-block-underline"></div></a></div><div class="fade-in-move-on-scroll"><a href="https://openart.ai/modeltrainingbook" class="footer-link w-inline-block"><div>Model training book</div><div class="link-block-underline"></div></a></div><div class="fade-in-move-on-scroll"><a href="https://openart.ai/new-on-openart" class="footer-link w-inline-block"><div>What's new?</div><div class="link-block-underline"></div></a></div><div class="fade-in-move-on-scroll"><a href="https://openart.ai/partners" class="footer-link w-inline-block"><div>Partners</div><div class="link-block-underline"></div></a></div><div class="fade-in-move-on-scroll"><a href="https://openart.ai/mit-ai-filmmaking-hackathon" class="footer-link w-inline-block"><div>MIT AI Film</div><div class="link-block-underline"></div></a></div><div class="fade-in-move-on-scroll"><a href="https://openart.ai/features" class="footer-link w-inline-block"><div>Features</div><div class="link-block-underline"></div></a></div><div class="fade-in-move-on-scroll"><a href="https://openart.ai/generator" class="footer-link w-inline-block"><div>Generators</div><div class="link-block-underline"></div></a></div><div class="fade-in-move-on-scroll"><a href="https://openart.ai/video-generators" class="footer-link w-inline-block"><div>Video Generators</div><div class="link-block-underline"></div></a></div><div class="fade-in-move-on-scroll"><a href="https://openart.ai/fan-art" class="footer-link w-inline-block"><div>Fan Art</div><div class="link-block-underline"></div></a></div><div class="fade-in-move-on-scroll"><a href="https://openart.ai/model" class="footer-link w-inline-block"><div>Image/Video Models</div><div class="link-block-underline"></div></a></div><div class="fade-in-move-on-scroll"><a href="https://openart.ai/programs/cpp" class="footer-link w-inline-block"><div>Creative Partner </div><div class="link-block-underline"></div></a></div><div class="fade-in-move-on-scroll"><a href="https://openart.ai/programs/affiliate" class="footer-link w-inline-block"><div>Affiliates Program</div><div class="link-block-underline"></div></a></div></div><div class="footer-grid-content"><div class="footer-heading">Need Help?</div><div class="fade-in-move-on-scroll"><a href="mailto:support@openart.ai" class="footer-link w-inline-block"><div>Email us</div><div class="link-block-underline"></div></a></div><div class="fade-in-move-on-scroll"><a href="https://discord.com/invite/openart-ai-1009536403555750018" class="footer-link w-inline-block"><div>Discord</div><div class="link-block-underline"></div></a></div><div class="fade-in-move-on-scroll"><a href="https://openart.ai/wiki/getting-started/create-your-first-image" class="footer-link w-inline-block"><div>Help Center</div><div class="link-block-underline"></div></a></div><div class="fade-in-move-on-scroll"><a href="https://openart.ai/general_faq" class="footer-link w-inline-block"><div>FAQ</div><div class="link-block-underline"></div></a></div></div></div><div data-w-id="eb050d0c-cd20-6fbc-5d31-0eaf0a144c87" class="made-by-section"><div class="copyright-text">© 2026 OpenArt. All rights reserved.</div><div class="social-icons1_component"><div class="w-layout-grid social-icons1_list"><a href="https://twitter.com/openart_ai" target="_blank" class="social-icons1_link w-inline-block"><div class="icon-embed-xsmall w-embed"><svg width="100%" height="100%" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M17.1761 4H19.9362L13.9061 10.7774L21 20H15.4456L11.0951 14.4066L6.11723 20H3.35544L9.80517 12.7508L3 4H8.69545L12.6279 9.11262L17.1761 4ZM16.2073 18.3754H17.7368L7.86441 5.53928H6.2232L16.2073 18.3754Z" fill="CurrentColor"></path>
+</svg></div></a><a href="https://www.youtube.com/@openart_ai" target="_blank" class="social-icons1_link w-inline-block"><div class="icon-embed-xsmall w-embed"><svg width="100%" height="100%" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M20.5686 4.77345C21.5163 5.02692 22.2555 5.76903 22.5118 6.71673C23.1821 9.42042 23.1385 14.5321 22.5259 17.278C22.2724 18.2257 21.5303 18.965 20.5826 19.2213C17.9071 19.8831 5.92356 19.8015 3.40294 19.2213C2.45524 18.9678 1.71595 18.2257 1.45966 17.278C0.827391 14.7011 0.871044 9.25144 1.44558 6.73081C1.69905 5.78311 2.44116 5.04382 3.38886 4.78753C6.96561 4.0412 19.2956 4.282 20.5686 4.77345ZM9.86682 8.70227L15.6122 11.9974L9.86682 15.2925V8.70227Z" fill="CurrentColor"></path>
+</svg></div></a><a href="https://discord.com/invite/openart-ai-1009536403555750018" target="_blank" class="social-icons1_link w-inline-block"><div class="icon-embed-xsmall w-embed"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" class="iconify iconify--ic" width="100%" height="100%" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><path fill="currentColor" d="M19.27 5.33C17.94 4.71 16.5 4.26 15 4a.1.1 0 0 0-.07.03c-.18.33-.39.76-.53 1.09a16.1 16.1 0 0 0-4.8 0c-.14-.34-.35-.76-.54-1.09c-.01-.02-.04-.03-.07-.03c-1.5.26-2.93.71-4.27 1.33c-.01 0-.02.01-.03.02c-2.72 4.07-3.47 8.03-3.1 11.95c0 .02.01.04.03.05c1.8 1.32 3.53 2.12 5.24 2.65c.03.01.06 0 .07-.02c.4-.55.76-1.13 1.07-1.74c.02-.04 0-.08-.04-.09c-.57-.22-1.11-.48-1.64-.78c-.04-.02-.04-.08-.01-.11c.11-.08.22-.17.33-.25c.02-.02.05-.02.07-.01c3.44 1.57 7.15 1.57 10.55 0c.02-.01.05-.01.07.01c.11.09.22.17.33.26c.04.03.04.09-.01.11c-.52.31-1.07.56-1.64.78c-.04.01-.05.06-.04.09c.32.61.68 1.19 1.07 1.74c.03.01.06.02.09.01c1.72-.53 3.45-1.33 5.25-2.65c.02-.01.03-.03.03-.05c.44-4.53-.73-8.46-3.1-11.95c-.01-.01-.02-.02-.04-.02M8.52 14.91c-1.03 0-1.89-.95-1.89-2.12s.84-2.12 1.89-2.12c1.06 0 1.9.96 1.89 2.12c0 1.17-.84 2.12-1.89 2.12m6.97 0c-1.03 0-1.89-.95-1.89-2.12s.84-2.12 1.89-2.12c1.06 0 1.9.96 1.89 2.12c0 1.17-.83 2.12-1.89 2.12"></path></svg></div></a><a href="mailto:support@openart.ai" class="social-icons1_link w-inline-block"><div class="icon-embed-xsmall w-embed"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" class="iconify iconify--ic" width="100%" height="100%" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><path fill="currentColor" d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2m-.4 4.25l-7.07 4.42c-.32.2-.74.2-1.06 0L4.4 8.25a.85.85 0 1 1 .9-1.44L12 11l6.7-4.19a.85.85 0 1 1 .9 1.44"></path></svg></div></a><a href="https://www.instagram.com/openart_ai" target="_blank" class="social-icons1_link w-inline-block"><div class="icon-embed-xsmall w-embed"><svg width="100%" height="100%" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M16 3H8C5.23858 3 3 5.23858 3 8V16C3 18.7614 5.23858 21 8 21H16C18.7614 21 21 18.7614 21 16V8C21 5.23858 18.7614 3 16 3ZM19.25 16C19.2445 17.7926 17.7926 19.2445 16 19.25H8C6.20735 19.2445 4.75549 17.7926 4.75 16V8C4.75549 6.20735 6.20735 4.75549 8 4.75H16C17.7926 4.75549 19.2445 6.20735 19.25 8V16ZM16.75 8.25C17.3023 8.25 17.75 7.80228 17.75 7.25C17.75 6.69772 17.3023 6.25 16.75 6.25C16.1977 6.25 15.75 6.69772 15.75 7.25C15.75 7.80228 16.1977 8.25 16.75 8.25ZM12 7.5C9.51472 7.5 7.5 9.51472 7.5 12C7.5 14.4853 9.51472 16.5 12 16.5C14.4853 16.5 16.5 14.4853 16.5 12C16.5027 10.8057 16.0294 9.65957 15.1849 8.81508C14.3404 7.97059 13.1943 7.49734 12 7.5ZM9.25 12C9.25 13.5188 10.4812 14.75 12 14.75C13.5188 14.75 14.75 13.5188 14.75 12C14.75 10.4812 13.5188 9.25 12 9.25C10.4812 9.25 9.25 10.4812 9.25 12Z" fill="CurrentColor"></path>
+</svg></div></a><a href="https://www.linkedin.com/company/openart-ai" target="_blank" class="social-icons1_link w-inline-block"><div class="icon-embed-xsmall w-embed"><svg width="100%" height="100%" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M4.5 3C3.67157 3 3 3.67157 3 4.5V19.5C3 20.3284 3.67157 21 4.5 21H19.5C20.3284 21 21 20.3284 21 19.5V4.5C21 3.67157 20.3284 3 19.5 3H4.5ZM8.52076 7.00272C8.52639 7.95897 7.81061 8.54819 6.96123 8.54397C6.16107 8.53975 5.46357 7.90272 5.46779 7.00413C5.47201 6.15897 6.13998 5.47975 7.00764 5.49944C7.88795 5.51913 8.52639 6.1646 8.52076 7.00272ZM12.2797 9.76176H9.75971H9.7583V18.3216H12.4217V18.1219C12.4217 17.742 12.4214 17.362 12.4211 16.9819V16.9818V16.9816V16.9815V16.9812C12.4203 15.9674 12.4194 14.9532 12.4246 13.9397C12.426 13.6936 12.4372 13.4377 12.5005 13.2028C12.7381 12.3253 13.5271 11.7586 14.4074 11.8979C14.9727 11.9864 15.3467 12.3141 15.5042 12.8471C15.6013 13.1803 15.6449 13.5389 15.6491 13.8863C15.6605 14.9339 15.6589 15.9815 15.6573 17.0292V17.0294C15.6567 17.3992 15.6561 17.769 15.6561 18.1388V18.3202H18.328V18.1149C18.328 17.6629 18.3278 17.211 18.3275 16.7591V16.759V16.7588C18.327 15.6293 18.3264 14.5001 18.3294 13.3702C18.3308 12.8597 18.276 12.3563 18.1508 11.8627C17.9638 11.1286 17.5771 10.5211 16.9485 10.0824C16.5027 9.77019 16.0133 9.5691 15.4663 9.5466C15.404 9.54401 15.3412 9.54062 15.2781 9.53721L15.2781 9.53721L15.2781 9.53721C14.9984 9.52209 14.7141 9.50673 14.4467 9.56066C13.6817 9.71394 13.0096 10.0641 12.5019 10.6814C12.4429 10.7522 12.3852 10.8241 12.2991 10.9314L12.2991 10.9315L12.2797 10.9557V9.76176ZM5.68164 18.3244H8.33242V9.76733H5.68164V18.3244Z" fill="CurrentColor"></path>
+</svg></div></a></div></div></div></div></div>
+
+
+<script>
+/* ── Floating BG icons ── */
+(function(){
+  const icons = ['⭐','🚀','✨','🌙','⚡','💫','🌟','💥','🎯','🎬','💎','🔮','🪐','◆','★','✦'];
+  const layer = document.getElementById('bg-layer');
+  for(let i=0;i<30;i++){
+    const el = document.createElement('span');
+    el.className = 'fi';
+    el.textContent = icons[Math.floor(Math.random()*icons.length)];
+    const x = Math.random()*97, y = Math.random()*97;
+    const dur = 6+Math.random()*9, delay = -Math.random()*9;
+    const sz = 0.75+Math.random()*0.9;
+    el.style.cssText=`left:${x}%;top:${y}%;font-size:${sz}rem;animation-duration:${dur}s;animation-delay:${delay}s`;
+    layer.appendChild(el);
+  }
+})();
+
+/* ── Countdown ── */
+(function(){
+  const target = new Date('2025-06-01T00:00:00+08:00').getTime();
+  const pad = n => String(Math.max(0,n)).padStart(2,'0');
+  function tick(){
+    const diff = Math.max(0, target - Date.now());
+    const d=Math.floor(diff/86400000),
+          h=Math.floor((diff%86400000)/3600000),
+          m=Math.floor((diff%3600000)/60000),
+          s=Math.floor((diff%60000)/1000);
+    document.getElementById('td').textContent=pad(d);
+    document.getElementById('th').textContent=pad(h);
+    document.getElementById('tm').textContent=pad(m);
+    document.getElementById('ts').textContent=pad(s);
+  }
+  tick(); setInterval(tick,1000);
+})();
+
+/* ── Tab switch ── */
+function switchTab(btn, mode){
+  btn.closest('.tabs').querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const row = document.getElementById('upload-row');
+  if(row) row.style.display = mode==='img' ? 'grid' : 'none';
+}
+
+/* ── Ratio picker ── */
+function pickRatio(el){
+  el.closest('.ratio-chips').querySelectorAll('.rc').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+}
+
+/* ── Video dots ── */
+let dotIdx = 0;
+function rotDot(dir){
+  const dots=[...document.querySelectorAll('#vp-dots .vdot')];
+  dots[dotIdx].classList.remove('active');
+  dotIdx=(dotIdx+dir+dots.length)%dots.length;
+  dots[dotIdx].classList.add('active');
+}
+document.querySelectorAll('#vp-dots .vdot').forEach((d,i)=>{
+  d.addEventListener('click',()=>{
+    document.querySelectorAll('#vp-dots .vdot').forEach(x=>x.classList.remove('active'));
+    d.classList.add('active'); dotIdx=i;
+  });
+});
+
+/* ── FAQ accordion ── */
+function toggleFaq(btn){
+  const item = btn.closest('.faq-item');
+  const isOpen = item.classList.contains('open');
+  document.querySelectorAll('.faq-item.open').forEach(i=>i.classList.remove('open'));
+  if(!isOpen) item.classList.add('open');
+}
+</script>
+
+<style id="dark-mode-override">
+  
+  /* ===== CRITICAL: Fix OpenArt Webflow body grid override ===== */
+  body {
+    display: block !important;
+    grid-template-columns: unset !important;
+    padding-top: 70px !important;  /* space for fixed navbar */
+  }
+  /* Fix section visibility */
+  section, .hero, #hero, #what, #features, #how, #faq, #cta-final {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
+  /* ===== GLOBAL DARK MODE OVERRIDE ===== */
+  /* Override all OpenArt Webflow white backgrounds */
+  body, html {
+    background-color: #080808 !important;
+    color: #ffffff !important;
+  }
+  section, div, main, article, aside, header, nav, footer {
+    background-color: transparent;
+  }
+  /* Override specific Webflow white section classes */
+  .section, .section-2, .feature-section, .faq-section,
+  .hero-gradient, .w-section, [class*="section"],
+  .container, .container-large, .container-medium, .container-small,
+  .header19_component, .w-layout-grid, .cta_content {
+    background-color: transparent !important;
+  }
+  /* Override any remaining white/light backgrounds */
+  *[style*="background-color: rgb(255, 255, 255)"],
+  *[style*="background-color:#fff"],
+  *[style*="background-color: #fff"],
+  *[style*="background: #fff"],
+  *[style*="background:white"] {
+    background-color: #080808 !important;
+  }
+  /* Force text colors */
+  p, h1, h2, h3, h4, h5, h6, span, div, li, a:not(.button):not(.nav-btn):not(.w-button) {
+    color: inherit;
+  }
+  /* Footer text readable */
+  .footer-link, .footer-heading, .copyright-text {
+    color: rgba(255,255,255,0.7) !important;
+  }
+  .footer-heading { color: #ffffff !important; }
+  /* Nav background */
+  .fixed-navbar, .navbar-1-component, .w-nav {
+    background-color: #080808 !important;
+    border-bottom: 1px solid rgba(255,255,255,0.08) !important;
+  }
+  /* Card sections - give slight contrast */
+  .features-grid > *, .steps-grid > *, .faq-item {
+    background-color: rgba(255,255,255,0.035) !important;
+  }
+</style>
+</body>
+</html>
